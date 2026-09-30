@@ -17,7 +17,7 @@ test("beta onboarding, note create/edit, export, resources and privacy", async (
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true);
-  await page.getByRole("button", { name: "음성으로 기록하기", exact: true }).click();
+  await page.getByRole("button", { name: "사진 찍기", exact: true }).click();
   await page.getByLabel("휴대전화 번호").fill("123");
   await page.getByRole("button", { name: "체험 시작하기" }).click();
   await expect(page.getByRole("dialog").getByRole("alert")).toContainText("휴대전화 번호를 확인");

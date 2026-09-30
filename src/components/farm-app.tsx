@@ -47,7 +47,6 @@ import {
 } from "@/lib/domain";
 import * as repo from "@/lib/repository";
 import { compressPhoto } from "@/lib/images";
-import FarmScene from "./farm-scene";
 import Recorder from "./recorder";
 type View = "home" | "notes" | "resources" | "news" | "community" | "settings";
 type Modal = "login" | "site" | "photo" | "voice" | "text" | "post" | null;
@@ -715,23 +714,22 @@ export default function FarmApp() {
                   <p>
                     흙 묻은 손으로 길게 쓰지 않아도 괜찮아요.
                     <br />
-                    오늘 한 일을 들려주세요.
+                    오늘의 작물과 작업을 사진으로 남겨주세요.
                   </p>
-                  <button className="primary" onClick={() => open("voice")}>
-                    <Mic size={21} /> 음성으로 기록하기{" "}
+                  <button className="primary" onClick={() => open("photo")}>
+                    <Camera size={21} /> 사진 찍기{" "}
                     <ArrowUpRight size={18} />
                   </button>
                 </div>
-                <FarmScene />
               </section>
               <section className="quick-actions" aria-label="기록 방법">
-                <button className="action-card" onClick={() => open("photo")}>
+                <button className="action-card" onClick={() => open("voice")}>
                   <span className="action-icon mint">
-                    <Camera size={28} />
+                    <Mic size={28} />
                   </span>
                   <span>
-                    <strong>사진 찍기</strong>
-                    <small>오늘의 작물 상태를 찰칵</small>
+                    <strong>음성으로 기록하기</strong>
+                    <small>오늘 한 일을 목소리로 간편하게</small>
                   </span>
                   <ChevronRight />
                 </button>
