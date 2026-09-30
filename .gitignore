@@ -1,0 +1,16 @@
+node_modules/
+.next/
+.vercel/
+.env*
+!.env.example
+*.docx
+*.pptx
+KakaoTalk_*.jpg
+artifacts/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+.vercel
+.env*
+!.env.example

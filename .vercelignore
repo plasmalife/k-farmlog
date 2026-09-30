@@ -1,0 +1,9 @@
+*.docx
+*.pptx
+KakaoTalk_*.jpg
+artifacts/
+tests/
+docs/
+README.md
+.env.local
+.env.example
