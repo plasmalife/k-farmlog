@@ -7,3 +7,6 @@ docs/
 README.md
 .env.local
 .env.example
+
+.env*
+supabase/.temp/

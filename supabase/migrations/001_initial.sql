@@ -1,7 +1,7 @@
 -- K영농일지 beta. Run once in the target project's SQL editor.
 create table public.profiles (
  id uuid primary key references auth.users(id) on delete cascade,
- phone text not null check(phone ~ '^01[016789][0-9]{7,8}$),
+ phone text not null check(phone ~ '^01[016789][0-9]{7,8}$'),
  nickname text not null default '농부' check(char_length(nickname) between 1 and 30),
  created_at timestamptz not null default now()
 );
@@ -79,3 +79,15 @@ create index entries_note_idx on public.entries(note_id,created_at);
 create index notes_user_date_idx on public.notes(user_id,note_date desc);
 create index usage_date_idx on public.ai_usage(created_at);
 create index photos_expiry_idx on public.note_photos(created_at);
+
+-- Explicit Data API grants: RLS remains the row-level authorization boundary.
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.profiles, public.cultivation_sites,
+ public.notes, public.entries, public.note_photos to authenticated;
+grant select, insert, delete on public.community_posts to authenticated;
+revoke all on public.ai_usage from anon, authenticated;
+create index sites_user_idx on public.cultivation_sites(user_id);
+create index entries_user_idx on public.entries(user_id);
+create index photos_user_idx on public.note_photos(user_id);
+create index posts_user_idx on public.community_posts(user_id);
+create index usage_user_date_idx on public.ai_usage(user_id,created_at);

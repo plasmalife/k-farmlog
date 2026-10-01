@@ -26,6 +26,8 @@ export type Note = {
   photos: Photo[];
 };
 export type Post = {
+  photo_paths?: string[];
+  photo_urls?: string[];
   id: string;
   user_id: string;
   nickname: string;

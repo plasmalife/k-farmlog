@@ -60,18 +60,16 @@ export async function addSite(site: Omit<Site, "id">) {
 export async function ensureNote(site: Site, date = todayKST()) {
   const db = client(),
     uid = await userId();
-  const { data, error } = await db
-    .from("notes")
-    .upsert(
-      {
-        user_id: uid,
-        site_id: site.id,
-        note_date: date,
-        region: site.region,
-        crop: site.crop,
-      },
-      { onConflict: "user_id,site_id,note_date", ignoreDuplicates: true },
-    );
+  const { data, error } = await db.from("notes").upsert(
+    {
+      user_id: uid,
+      site_id: site.id,
+      note_date: date,
+      region: site.region,
+      crop: site.crop,
+    },
+    { onConflict: "user_id,site_id,note_date", ignoreDuplicates: true },
+  );
   if (error) throw new Error("노트를 만들지 못했습니다.");
   void data;
   const found = await db
@@ -119,21 +117,19 @@ export async function savePhoto(
     });
   if (uploadError)
     throw new Error("사진 업로드에 실패했습니다. 텍스트 기록은 유지됩니다.");
-  const { error } = await db
-    .from("note_photos")
-    .upsert(
-      {
-        note_id: noteId,
-        user_id: uid,
-        slot,
-        path,
-        score,
-        description,
-        pinned: false,
-        created_at: new Date().toISOString(),
-      },
-      { onConflict: "note_id,slot" },
-    );
+  const { error } = await db.from("note_photos").upsert(
+    {
+      note_id: noteId,
+      user_id: uid,
+      slot,
+      path,
+      score,
+      description,
+      pinned: false,
+      created_at: new Date().toISOString(),
+    },
+    { onConflict: "note_id,slot" },
+  );
   if (error)
     throw new Error("사진 정보를 저장하지 못했습니다. 다시 시도해 주세요.");
 }
@@ -156,32 +152,71 @@ export async function pinPhoto(photo: Photo) {
     .eq("slot", photo.slot);
   if (error) throw new Error("대표 사진 설정을 변경하지 못했습니다.");
 }
-export async function loadPosts() {
+export async function loadPosts(page = 0) {
   const { data, error } = await client()
     .from("community_posts")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(50);
+    .order("id", { ascending: false })
+    .range(page * 20, page * 20 + 19);
   if (error) throw new Error("친구 소식을 불러오지 못했습니다.");
-  return (data || []) as Post[];
+  return await Promise.all(
+    (data || []).map(async (post) => {
+      const paths = post.photo_paths || [];
+      const { data: urls } = paths.length
+        ? await client()
+            .storage.from("community-photos")
+            .createSignedUrls(paths, 3600)
+        : { data: [] };
+      return {
+        ...post,
+        photo_urls: (urls || []).map((p) => p.signedUrl).filter(Boolean),
+      } as Post;
+    }),
+  );
 }
 export async function createPost(
   content: string,
   site: Site,
   nickname: string,
+  photos: Blob[] = [],
+  id = crypto.randomUUID(),
 ) {
-  const { error } = await client()
-    .from("community_posts")
-    .insert({
-      user_id: await userId(),
-      nickname,
-      region: site.region,
-      crop: site.crop,
-      content,
-    });
+  const uid = await userId();
+  const paths: string[] = [];
+  for (let i = 0; i < photos.length; i++) {
+    const path = `${uid}/${id}/${i + 1}.jpg`;
+    const { error } = await client()
+      .storage.from("community-photos")
+      .upload(path, photos[i], { contentType: "image/jpeg", upsert: true });
+    if (error)
+      throw new Error("소식 사진을 올리지 못했습니다. 다시 시도해 주세요.");
+    paths.push(path);
+  }
+  const { error } = await client().from("community_posts").upsert({
+    id,
+    photo_paths: paths,
+    user_id: uid,
+    nickname,
+    region: site.region,
+    crop: site.crop,
+    content,
+  });
   if (error) throw new Error("소식을 올리지 못했습니다.");
 }
 export async function removePost(id: string) {
+  const { data } = await client()
+    .from("community_posts")
+    .select("photo_paths")
+    .eq("id", id)
+    .single();
+  if (data?.photo_paths?.length) {
+    const { error } = await client()
+      .storage.from("community-photos")
+      .remove(data.photo_paths);
+    if (error)
+      throw new Error("사진을 삭제하지 못했습니다. 다시 시도해 주세요.");
+  }
   const { error } = await client()
     .from("community_posts")
     .delete()
@@ -208,5 +243,20 @@ export async function runAI(form: FormData) {
     date: string;
     score: number;
     changed: boolean;
+    transcript?: string;
   };
+}
+
+export async function deletePhoto(photo: Photo) {
+  const { error: storageError } = await client()
+    .storage.from("farm-photos")
+    .remove([photo.path]);
+  if (storageError) throw new Error("사진을 삭제하지 못했습니다.");
+  const { error } = await client()
+    .from("note_photos")
+    .delete()
+    .eq("note_id", photo.note_id)
+    .eq("slot", photo.slot);
+  if (error)
+    throw new Error("사진 정보를 삭제하지 못했습니다. 다시 시도해 주세요.");
 }

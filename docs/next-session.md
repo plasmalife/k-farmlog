@@ -1,30 +1,12 @@
-# 다음 작업을 위한 메모
+# 다음 작업 (2026-10-01)
 
-## 저장된 상태
-
-- GitHub: https://github.com/plasmalife/k-farmlog
-- 운영 주소: https://k-farmlog.vercel.app
-- Vercel: hamburus-projects / k-farmlog, main 브랜치 자동 배포 연결
-- 최신 화면 수정 커밋: 1e3b9cc
-- 메인 상단 큰 버튼은 사진 찍기, 아래 첫 카드는 음성으로 기록하기.
-- 메인 농장 일러스트를 제거하고 텍스트 중심으로 구성.
-- 배포 빌드 및 운영 주소의 모바일/데스크톱 테스트 4개 통과.
-
-## 다음에 이어 할 일
-
-1. Supabase 실제 프로젝트 주소와 연결 상태 확인. 기존에 받은 주소는 조직 주소였으며 프로젝트 연결은 미완료.
-2. 전용 프로젝트에서 SQL 마이그레이션 검토·실행, 익명 로그인 활성화, 공개 URL/key 환경변수 등록.
-3. 2026-10-01 문서의 OpenAI 키를 문단 경계를 보존해 추출하여 인증 HTTP 200 확인. Vercel Production의 OPENAI_API_KEY를 해당 키로 Secret 등록 완료. 실제 사진·음성 API 호출은 Supabase 연결 후 검증 필요.
-4. 환경변수 설정 후 재배포하고 실제 사진 분석, 음성 변환, 노트 저장 및 사용자별 데이터 접근 제한 검증.
-5. 사진 365일 정리에 필요한 서버 환경변수 및 예약 작업 검증.
-
-현재 외부 연결 미완료 상태의 사이트는 체험 모드이며, 기록은 새로고침 시 초기화됨. 실제 DB/AI 연동을 완료했다고 간주하지 말 것.
-
-2026-10-01 Supabase 연결 도구에서 조직의 프로젝트 목록 확인: CROP_HEALTH(qwzpdhlkifvpfwplqcvx)만 존재하며 INACTIVE 상태. k-farmlog 새 프로젝트 생성 비용은 월 0달러로 조회됨. 새 프로젝트 생성/기존 프로젝트 복원은 사용자 선택을 기다리는 중이며 아직 실행하지 않음.
-
-## 작업 원칙
-
-- 기존 PRD보다 보완 문서의 수정 사항을 우선: 음성 파일 미보관, 핵심 텍스트 저장, 사진 날짜·재배지별 최대 3장.
-- 비밀키 문서, .env.local, 원본 첨부자료는 Git 및 배포 파일에서 제외되어 있음. 비밀값은 문서/로그/소스에 복사하지 않음.
-- 일반 명령 및 컴퓨터 유즈 런타임에서 샌드박스 초기화 오류가 발생했음. 승인된 exec 명령과 브라우저 테스트는 동작했음.
-- 사용자가 다음 작업을 요청할 때 이어 진행. 추가 개발이나 서비스 변경을 예약하지 않음.
+- GitHub plasmalife/k-farmlog, Vercel hamburus-projects/k-farmlog, 운영 https://k-farmlog.vercel.app
+- 사용자 reference 폴더의 수정 요구서와 PPTX 3개 반영. 메인 중앙 친구소식, 사진 최대3장/삭제/재촬영, OCR 상세 비료정보/첫 사진 상태분석, 음성 STT→수정→요약, 오늘의 일기 UI.
+- Supabase cjalujpyghyvyuiqpgdk (서울) 생성 및 초기/권한/공개 게시판 사진 마이그레이션 적용 완료. 보안 advisor 지적 없음. 비회원 공개 게시물 조회 HTTP200.
+- Vercel Production Supabase URL/key 확인 완료. OPENAI_API_KEY는 서버 비밀값. OPENAI_KEY_API라는 별도 값도 있으나 앱은 사용하지 않음.
+- 실제 OpenAI 합성 사진 OCR 및 합성 음성 인식 성공. 비료 수식/단위/수량 확인.
+- Playwright PC/mobile의 사진 저장·삭제·새로고침, STT와 공개 게시물 흐름은 모의 연결 검증. 실제 인증 저장 검증으로 보고하면 안 됨.
+- 아직 Supabase Anonymous Sign-Ins 비활성. https://supabase.com/dashboard/project/cjalujpyghyvyuiqpgdk/auth/providers 에서 사용자가 켜야 함. 컴퓨터 유즈(cua와 sky 모두)는 sandbox helper 초기화 오류로 접속 실패.
+- 활성화 후 두 사용자 세션으로 실제 회원가입, 개인 기록 CRUD/사진 비공개, 공개 게시판, AI 앱 경로 전체 검증 필요.
+- 사진 365일 정리용 CRON_SECRET와 SUPABASE_SERVICE_ROLE_KEY 미설정.
+- 비밀 문서/환경변수/원본 참고자료는 Git과 배포에서 제외. public/samples만 사용자 요청한 참고 샘플로 제공.
